@@ -9,7 +9,7 @@ import shutil
 
 
 intents = disnake.Intents.default()
-intents.message_content = True  # Включаем интент message_content
+intents.message_content = True  
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
