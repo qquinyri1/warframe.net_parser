@@ -1,3 +1,4 @@
+import os
 import json
 import disnake
 from disnake.ext import commands
@@ -6,10 +7,8 @@ import time
 import re
 import shutil
 
-
-
 intents = disnake.Intents.default()
-intents.message_content = True  # Включаем интент message_content
+intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
@@ -21,9 +20,9 @@ async def on_ready():
     description="Search for a name by price"
 )
 async def search(ctx, url: str, price: str):
-    path = 'write-here-path-to-file/source-page.txt'
+    current_directory = os.path.dirname(os.path.abspath(__file__))
     data = {}
-    Is_sayed = True
+    Is_said = True
     Is_found = True
     try:
         while Is_found:
@@ -31,6 +30,8 @@ async def search(ctx, url: str, price: str):
             driver.maximize_window()
             driver.get(url=url)
             time.sleep(1)
+
+            path = os.path.join(current_directory, 'source-page.txt')
 
             with open(path, 'w', encoding='utf-16') as fh:
                 fh.write(driver.page_source)
@@ -49,15 +50,15 @@ async def search(ctx, url: str, price: str):
                     find_and_save_name_price(path, data)
                 shutil.os.remove(path)
 
-            save_to_json(data)
-            names = find_names_by_price(price)
+            save_to_json(data, current_directory)
+            names = find_names_by_price(price, current_directory)
             if names:
                 mention = ctx.author.mention
                 await ctx.send(f"{mention}, найдены следующие имена с ценой {price}: {', '.join(names)}\nURL: {url}, Цена: {price}")
                 break
-            if Is_sayed:
+            if Is_said:
                 await ctx.send(f"Цена: {price}, я дам вам знать когда нужный лот будет найден")
-                Is_sayed = False
+                Is_said = False
 
     except Exception as _ex:
         print(_ex)
@@ -82,15 +83,17 @@ def find_and_save_name_price(path, data):
     for name, price in matches:
         data[name] = price 
 
-def save_to_json(data):
-    with open('data.json', 'w') as json_file:
+def save_to_json(data, current_directory):
+    json_path = os.path.join(current_directory, 'data.json')
+    with open(json_path, 'w') as json_file:
         json.dump(data, json_file, indent=4)
 
-def find_names_by_price(price):
-    with open('data.json', 'r') as json_file:
+def find_names_by_price(price, current_directory):
+    json_path = os.path.join(current_directory, 'data.json')
+    with open(json_path, 'r') as json_file:
         data = json.load(json_file)
         names = [name for name, p in data.items() if p == price]
         return names
     
-bot.run('Your token')
-#https://youtu.be/1N1iyaHJcm0
+bot.run('ur token , create token on discord developer portal')
+
